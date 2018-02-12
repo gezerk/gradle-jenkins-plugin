@@ -2,8 +2,10 @@ package com.terrafolio.gradle.plugins.jenkins.service
 
 import com.google.common.annotations.VisibleForTesting
 import groovy.xml.StreamingMarkupBuilder
+import groovyx.net.http.HTTPBuilder
 import groovyx.net.http.HttpResponseException
 import groovyx.net.http.RESTClient
+import org.apache.http.impl.client.LaxRedirectStrategy
 
 import static groovyx.net.http.ContentType.XML
 
@@ -30,8 +32,10 @@ class JenkinsRESTServiceImpl implements JenkinsService {
     def getRestClient() {
         if (client == null) {
             client = new RESTClient(url)
+            (client as HTTPBuilder).client.setRedirectStrategy(new LaxRedirectStrategy())
             if (username != null) {
                 client.client.addRequestInterceptor(new PreemptiveAuthInterceptor(username, password))
+
             }
         }
 
@@ -62,6 +66,8 @@ class JenkinsRESTServiceImpl implements JenkinsService {
             }
         } else return null;
     }
+
+
 
     @Override
     public String getConfiguration(String jobName, Map overrides)
